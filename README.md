@@ -2,6 +2,8 @@ React/React Native fetching library, build on top of the web fetch api, and it c
 
 # Note: you can check the example project in github (do not forget a 🌟)
 
+Live example: https://use-fetch-three.vercel.app/
+
 # Usage
 
 ## Step 1: Import

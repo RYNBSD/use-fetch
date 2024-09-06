@@ -6,7 +6,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "exports": {
+    ".": "./lib/index.ts"
+  },
+  "keywords": [
+    "fetch",
+    "use",
+    "use-fetch",
+    "ryn",
+    "bsd",
+    "rb",
+    "react",
+    "ryn__bsd",
+    "ryn-bsd"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {

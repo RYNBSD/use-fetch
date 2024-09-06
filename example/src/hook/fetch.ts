@@ -1,4 +1,4 @@
-import { InitFetch } from "../../../lib/index";
+import { InitFetch } from "@ryn-bsd/use-fetch";
 
 const initFetch = new InitFetch("https://jsonplaceholder.typicode.com", {
   credentials: "include",

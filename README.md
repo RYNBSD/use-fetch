@@ -14,13 +14,70 @@ const initFetch = new InitFetch("https://jsonplaceholder.typicode.com", {
   credentials: "include",
 });
 
+export const useSend = initFetch.useSend;
 export const useFetch = initFetch.useFetch;
 export const useInfiniteFetch = initFetch.useInfiniteFetch;
 ```
 
 ## Step 2: Use
 
-### Example 1: useFetch
+### Example 1: useSend
+
+```tsx
+export default function Send() {
+  const [fields, setFields] = useState({});
+
+  const { isSending, isError, error, send } = useSend({
+    path: "/posts",
+    callback(response) {
+      alert(response.ok ? "Success" : "Failed");
+    },
+  });
+
+  const onChange = useCallback((name: string, value: string) => {
+    setFields((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  if (isError) alert(error?.message ?? "Error");
+
+  return (
+    <div>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          await send({
+            method: "POST",
+            body: JSON.stringify({ ...fields, userId: 1 }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+        }}
+      >
+        <input
+          name="title"
+          type="text"
+          placeholder="title"
+          onChange={(e) => onChange(e.target.name, e.target.value)}
+        />
+        <input
+          name="body"
+          type="text"
+          placeholder="body"
+          onChange={(e) => onChange(e.target.name, e.target.value)}
+        />
+        <button type="submit" disabled={isSending}>
+          Submit
+        </button>
+      </form>
+    </div>
+  );
+}
+```
+
+useSend: pass the endpoint (path), and a callback to handle the response. In send function pass request init object (optional).
+
+### Example 2: useFetch
 
 ```tsx
 export default function Fetch() {
@@ -50,9 +107,9 @@ export default function Fetch() {
 }
 ```
 
-useFetch: Work like the regular fetch function, you have to pass an object with the endpoint and a custom callback to handle the response.
+useFetch: pass an object with the endpoint and a callback to handle the response, optional: pass request init object.
 
-### Example 2: useInfiniteFetch
+### Example 3: useInfiniteFetch
 
 ```tsx
 type FetchPost = { id: number; title: string };
@@ -111,7 +168,7 @@ export default function InfiniteFetch() {
 }
 ```
 
-useInfiniteFetch: it use useFetch in it core with more functionalities, it detect when the path change and fire new request, in the callback you have to return a boolean value to indicate if you reached the last page.
+useInfiniteFetch: it use useFetch in it core with more functionalities, it detect when the path changed to fire a new request, in the callback you have to return a boolean value to indicate if you reached the last page, optional: pass request init object.
 
 # Customization:
 

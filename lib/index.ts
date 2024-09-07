@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import useUpdateEffect from "react-use/lib/useUpdateEffect";
 
@@ -12,44 +12,69 @@ export class InitFetch {
     this.DEFAULT_INIT = init;
   }
 
-  useFetch = <TError extends Error = Error>(options: FetchOptions<void>) => {
-    const [isFetching, setIsFetching] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+  /**
+   * support any type of request, focused on POST, PUT, DELETE...
+   */
+  useSend = <TError extends Error = Error>(
+    options: Omit<FetchOptions<void>, "init">
+  ) => {
+    const [isSending, setIsSending] = useState(false);
     const [isError, setIsError] = useState(false);
-    const [error, setError] = useState<TError | null>(null);
+    const [error, setError] = useState<Error | null>(null);
 
-    const requestInit = useMemo(() => {
-      if (typeof options.init === "undefined") return this.DEFAULT_INIT;
-      if (typeof options.init === "function")
-        return options.init(this.DEFAULT_INIT);
-      return {
-        ...this.DEFAULT_INIT,
-        ...options.init,
-        headers: {
-          ...this.DEFAULT_INIT?.headers,
-          ...options.init?.headers,
-        },
-      } satisfies RequestInit;
-    }, [options.init]);
+    const send = useCallback(
+      async (init?: RequestInitOption) => {
+        setIsSending(true);
+        let requestInit: RequestInit | null | undefined = null;
 
-    const request = useCallback(
-      async (signal?: AbortSignal) => {
-        setIsFetching(true);
         try {
-          const ri = await requestInit;
-          const res = await fetch(`${this.BASE_URL}${options.path}`, {
-            ...ri,
-            signal,
+          requestInit =
+            typeof init === "function" ? await init(this.DEFAULT_INIT) : init;
+          const response = await fetch(`${this.BASE_URL}${options.path}`, {
+            ...this.DEFAULT_INIT,
+            ...requestInit,
+            headers: {
+              ...this.DEFAULT_INIT?.headers,
+              ...requestInit?.headers,
+            },
           });
-          await options.callback(res);
+          await options.callback(response);
         } catch (error) {
-          if (signal?.aborted) return;
+          if (requestInit?.signal?.aborted) return;
           setIsError(true);
           setError(error as TError);
         }
-        setIsFetching(false);
+        setIsSending(false);
       },
-      [options.path, options.callback, requestInit]
+      [options.path, options.callback]
+    );
+
+    return {
+      isSending,
+      isError,
+      error,
+      send,
+    };
+  };
+
+  /**
+   * for GET requests
+   */
+  useFetch = <TError extends Error = Error>(options: FetchOptions<void>) => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const {
+      isSending: isFetching,
+      isError,
+      error,
+      send,
+    } = this.useSend<TError>({ ...options });
+
+    const request = useCallback(
+      async (signal?: AbortSignal) => {
+        await send({ ...options.init, method: "GET", signal });
+      },
+      [send, options.init]
     );
 
     useEffectOnce(() => {
@@ -73,6 +98,9 @@ export class InitFetch {
     };
   };
 
+  /**
+   * for GET requests
+   */
   useInfiniteFetch = <TError extends Error = Error>(
     options: FetchOptions<boolean>
   ) => {
@@ -112,10 +140,16 @@ export class InitFetch {
   };
 }
 
+type PathOption = string;
+
+type CallbackOption<T> = (response: Response) => Promise<T> | T;
+
+type RequestInitOption =
+  | RequestInit
+  | ((defaultInit?: RequestInit) => Promise<RequestInit> | RequestInit);
+
 export type FetchOptions<T> = {
-  path: string;
-  init?:
-    | RequestInit
-    | ((defaultInit?: RequestInit) => Promise<RequestInit> | RequestInit);
-  callback: (response: Response) => Promise<T> | T;
+  path: PathOption;
+  callback: CallbackOption<T>;
+  init?: RequestInitOption;
 };

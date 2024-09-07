@@ -29,7 +29,7 @@ export class InitFetch {
           ...this.DEFAULT_INIT?.headers,
           ...options.init?.headers,
         },
-      };
+      } satisfies RequestInit;
     }, [options.init]);
 
     const request = useCallback(
@@ -73,20 +73,26 @@ export class InitFetch {
     };
   };
 
-  useInfiniteFetch = (options: FetchOptions<boolean>) => {
+  useInfiniteFetch = <TError extends Error = Error>(
+    options: FetchOptions<boolean>
+  ) => {
     const [hasNextPage, setHasNextPage] = useState(true);
+    const [allResponses, setAllResponses] = useState<Response[]>([]);
+    const [lastResponse, setLastResponse] = useState<Response | null>(null);
 
-    const { isFetching, isLoading, isError, error, refetch } = this.useFetch({
-      ...options,
-      async callback(response) {
-        if (!hasNextPage) return;
-        const checkNextPage = await options.callback(response);
-        setHasNextPage(checkNextPage);
-      },
-    });
+    const { isFetching, isLoading, isError, error, refetch } =
+      this.useFetch<TError>({
+        ...options,
+        async callback(response) {
+          setAllResponses((prev) => [...prev, response]);
+          setLastResponse(response);
+          const checkNextPage = await options.callback(response);
+          setHasNextPage(checkNextPage);
+        },
+      });
 
     useUpdateEffect(() => {
-      if (!hasNextPage || isFetching) return;
+      if (!hasNextPage || isFetching || isLoading) return;
       const controller = new AbortController();
       refetch(controller.signal);
       return () => {
@@ -95,6 +101,8 @@ export class InitFetch {
     }, [options.path]);
 
     return {
+      allResponses,
+      lastResponse,
       hasNextPage,
       isFetching,
       isLoading,

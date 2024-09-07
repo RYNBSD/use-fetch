@@ -1,6 +1,6 @@
 {
   "name": "@ryn-bsd/use-fetch",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,7 @@
   "exports": {
     ".": "./lib/index.ts"
   },
+  "author": "Rayen Boussayed <rynbsd04@gmail.com> (https://github.com/RYNBSD)",
   "keywords": [
     "fetch",
     "use",
@@ -20,7 +21,14 @@
     "ryn__bsd",
     "ryn-bsd"
   ],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RYNBSD/use-fetch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RYNBSD/use-fetch/issues"
+  },
+  "homepage": "https://github.com/RYNBSD/use-fetch#readme",
   "license": "ISC",
   "dependencies": {
     "react": "^18.3.1",

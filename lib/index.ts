@@ -72,7 +72,13 @@ export class InitFetch {
 
     const request = useCallback(
       async (signal?: AbortSignal) => {
-        await send({ ...options.init, method: "GET", signal });
+        await send(async (defaultInit) => {
+          const requestInit =
+            typeof options.init === "function"
+              ? await options.init(defaultInit)
+              : options.init;
+          return { ...requestInit, method: "GET", signal };
+        });
       },
       [send, options.init]
     );

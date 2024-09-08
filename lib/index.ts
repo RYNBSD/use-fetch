@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import useUpdateEffect from "react-use/lib/useUpdateEffect";
 
 export class InitFetch {
   private readonly BASE_URL: string;
@@ -139,7 +138,7 @@ export class InitFetch {
         },
       });
 
-    useUpdateEffect(() => {
+    useEffect(() => {
       if (!hasNextPage || isFetching || isLoading) return;
       const controller = new AbortController();
       refetch(controller.signal);

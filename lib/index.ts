@@ -1,5 +1,4 @@
-import { useCallback, useState } from "react";
-import useEffectOnce from "react-use/lib/useEffectOnce";
+import { useCallback, useEffect, useState } from "react";
 import useUpdateEffect from "react-use/lib/useUpdateEffect";
 
 export class InitFetch {
@@ -11,6 +10,22 @@ export class InitFetch {
     this.BASE_URL = baseUrl;
     this.DEFAULT_INIT = init;
   }
+
+  private parseRequestInit = (init?: RequestInitOption) => {
+    return typeof init === "function" ? init(this.DEFAULT_INIT) : init;
+  };
+
+  fetch = async (options: Omit<FetchOptions<never>, "callback">) => {
+    const requestInit = await this.parseRequestInit(options.init);
+    return window.fetch(`${this.BASE_URL}${options.path}`, {
+      ...requestInit,
+      ...this.DEFAULT_INIT,
+      headers: {
+        ...requestInit?.headers,
+        ...this.DEFAULT_INIT?.headers,
+      },
+    });
+  };
 
   /**
    * support any type of request, focused on POST, PUT, DELETE...
@@ -28,16 +43,18 @@ export class InitFetch {
         let requestInit: RequestInit | null | undefined = null;
 
         try {
-          requestInit =
-            typeof init === "function" ? await init(this.DEFAULT_INIT) : init;
-          const response = await fetch(`${this.BASE_URL}${options.path}`, {
-            ...this.DEFAULT_INIT,
-            ...requestInit,
-            headers: {
-              ...this.DEFAULT_INIT?.headers,
-              ...requestInit?.headers,
-            },
-          });
+          requestInit = await this.parseRequestInit(init);
+          const response = await window.fetch(
+            `${this.BASE_URL}${options.path}`,
+            {
+              ...this.DEFAULT_INIT,
+              ...requestInit,
+              headers: {
+                ...this.DEFAULT_INIT?.headers,
+                ...requestInit?.headers,
+              },
+            }
+          );
           await options.callback(response);
         } catch (error) {
           if (requestInit?.signal?.aborted) return;
@@ -72,18 +89,15 @@ export class InitFetch {
 
     const request = useCallback(
       async (signal?: AbortSignal) => {
-        await send(async (defaultInit) => {
-          const requestInit =
-            typeof options.init === "function"
-              ? await options.init(defaultInit)
-              : options.init;
+        await send(async () => {
+          const requestInit = await this.parseRequestInit(options.init);
           return { ...requestInit, method: "GET", signal };
         });
       },
       [send, options.init]
     );
 
-    useEffectOnce(() => {
+    useEffect(() => {
       const controller = new AbortController();
       (async () => {
         setIsLoading(true);
@@ -93,7 +107,7 @@ export class InitFetch {
       return () => {
         controller.abort();
       };
-    });
+    }, [request]);
 
     return {
       isFetching,

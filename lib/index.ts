@@ -106,7 +106,7 @@ export class InitFetch {
       return () => {
         controller.abort();
       };
-    }, [request]);
+    }, []);
 
     return {
       isFetching,

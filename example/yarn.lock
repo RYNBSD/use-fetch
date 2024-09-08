@@ -490,10 +490,10 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.21.2.tgz#e4291e3c1bc637083f87936c333cdbcad22af63b"
   integrity sha512-6UUxd0+SKomjdzuAcp+HAmxw1FlGBnl1v2yEPSabtx4lBfdXHDVsW7+lQkgz9cNFJGY3AWR7+V8P5BqkD9L9nA==
 
-"@ryn-bsd/use-fetch@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@ryn-bsd/use-fetch/-/use-fetch-1.1.2.tgz#f778229e44605b05e45c8781cedc41b5ef31698a"
-  integrity sha512-c7kVssj9gkD4u3yk/RYeOg65TJ/AVMIZURUeQOUUsUXu8Eei7MaQMsK3T28tiKEvB0Q6I9MHyy7NlUrcH6uU0Q==
+"@ryn-bsd/use-fetch@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@ryn-bsd/use-fetch/-/use-fetch-1.1.3.tgz#4763b7e7ad913f08674f7ba4e23775c67530f13d"
+  integrity sha512-WFs+sE+bOK3lFwJrV8GxwWH+IFfmvcqgSt3UTHD4f5whwLH4b6YL5PPuZ0LOYa8uSmsDPJ3Hynpc3BwlzX10/w==
   dependencies:
     react "^18.3.1"
 
